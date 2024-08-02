@@ -92,10 +92,10 @@ def setup_c_experiments(experiments):
         });
     st.session_state.correctness_tuples = experimentsList; 
 
-def create_user():
-    response = requests.post(f"{BACKEND_URL}/createuser");
-    if 200 <= response.status_code < 300:
-        fetch_user_information(response);
+#def create_user():
+#    response = requests.post(f"{BACKEND_URL}/createuser");
+#    if 200 <= response.status_code < 300:
+#        fetch_user_information(response);
 
 def fetch_user_information(response):
     id = response.json()["id"];
@@ -332,7 +332,7 @@ with st.sidebar:
 
     #st.text(f"Correctness: {st.session_state.correctness_done}/{st.session_state.number_of_correctness}")
     #st.text(f"Understandability: {st.session_state.understandability_done}/{st.session_state.number_of_understandability}")
-    st.button("Create new user", on_click=lambda: create_user(), help="Creates a new user ID with \n a new experimental setting")
+    #st.button("Create new user", on_click=lambda: create_user(), help="Creates a new user ID with \n a new experimental setting")
     st.button("Switch metric", on_click=lambda: switch_metric(), help="Switches between correctness and understandability")
 
 if st.session_state.current_metric == "Correctness":
