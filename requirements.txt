@@ -1,0 +1,4 @@
+python-decouple==3.8
+streamlit==1.37.0
+streamlit_code_editor==0.1.21
+Requests==2.32.3

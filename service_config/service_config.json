@@ -1,0 +1,11 @@
+{
+    "services": [{
+        "mode": "dockerfile",
+        "port": "40149:8501",
+        "image": "wseresearch/evaluation-frontend-client",
+        "tag": "latest",
+        "files": {
+            ".env": "env"
+        }
+    }]
+}
