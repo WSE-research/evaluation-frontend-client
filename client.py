@@ -2,6 +2,9 @@ import streamlit as st
 from code_editor import code_editor
 import requests
 import pandas as pd
+from decouple import config
+
+BACKEND_URL = config("BACKEND_URL")
 
 st.set_page_config(layout="wide")
 
@@ -90,7 +93,7 @@ def setup_c_experiments(experiments):
     st.session_state.correctness_tuples = experimentsList; 
 
 def create_user():
-    response = requests.post("http://localhost:8080/createuser");
+    response = requests.post(f"{BACKEND_URL}/createuser");
     if 200 <= response.status_code < 300:
         fetch_user_information(response);
 
@@ -170,7 +173,7 @@ def store_rating(rating_str):
         rating = int(rating_str);
         if not 0 <= rating <= 100:
             raise Exception("Errors must be between 0 and 100");
-        response = requests.post(f"http://localhost:8080/storecorrectness/{current_id}/{current_hash}/{rating}");
+        response = requests.post(f"{BACKEND_URL}/storecorrectness/{current_id}/{current_hash}/{rating}");
         if 200 <= response.status_code < 300:
             st.session_state.correctness_tuples[st.session_state.current_correctness_index]["rating"] = rating;
             print("Stored errors for explanations with hash ", st.session_state.correctness_tuples[st.session_state.current_correctness_index]["hash"], ": ", rating);
@@ -218,7 +221,7 @@ def next_understandability_explanation():
         "best": st.session_state.best_worst_current["best"],
         "worst": st.session_state.best_worst_current["worst"]
     }
-    response = requests.post(f"http://localhost:8080/storeunderstandability/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});    
+    response = requests.post(f"{BACKEND_URL}/storeunderstandability/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});    
     if 200 <= response.status_code < 300:
         st.session_state.understandability_tuples[st.session_state.current_understandability_index]["best"] = data["best"];
         st.session_state.understandability_tuples[st.session_state.current_understandability_index]["worst"] = data["worst"];
@@ -242,7 +245,7 @@ def previous_understandability_explanation():
         "worst": st.session_state.best_worst_current["worst"]
     };
     if(st.session_state.current_understandability_index > 0):
-        response = requests.post(f"http://localhost:8080/storeunderstandability/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});
+        response = requests.post(f"{BACKEND_URL}/storeunderstandability/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});
         if 200 <= response.status_code < 300:
             st.session_state.understandability_tuples[st.session_state.current_understandability_index]["best"] = data["best"];
             st.session_state.understandability_tuples[st.session_state.current_understandability_index]["worst"] = data["worst"];
@@ -311,7 +314,7 @@ def show_explanations(tuple, type):
         
 
 def login_user(user_id):
-    response = requests.post(f"http://localhost:8080/login/{user_id}");
+    response = requests.post(f"{BACKEND_URL}/login/{user_id}");
     if 200 <= response.status_code < 300:
         print("Login successful");
         fetch_user_information(response);
