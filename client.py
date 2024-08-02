@@ -293,6 +293,8 @@ def show_explanations(tuple, type):
     # Pre-process the tuple
     tupleFixed = tuple.split("-");
 
+    st.session_state.best_worst_current["tuple"] = tuple;
+
     col1, col2 = st.columns([.5,.5])
     with col1:
         st.text_area(label="Area", label_visibility='hidden', value=f"{st.session_state.hash_explanation_dict[tupleFixed[0]][1]}", height=300)
