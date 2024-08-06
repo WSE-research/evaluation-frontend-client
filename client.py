@@ -46,8 +46,8 @@ if "hash_explanation_dict_outputdata" not in st.session_state:
     st.session_state.hash_explanation_dict_outputdata = pd.read_csv("hash_explanation_dict_outputdata.csv", index_col=0, header=None).to_dict(orient="index"); 
                     
 
-st.title(f"{evaluation_title} evluation");
-st.header(f"Current evalauted metric: {st.session_state.current_metric}");
+st.title(f"{evaluation_title} evaluation");
+st.header(f"Current evaluated metric: {st.session_state.current_metric}");
 if st.session_state.current_metric == "Understandability":
     st.subheader("Select only one explanation as best and one as worst!")
     st.text("You can change your decision at any time, the latest selections will be stored");
@@ -58,10 +58,10 @@ elif st.session_state.current_metric == "Correctness":
     st.text("You can change your decision at any time, the latest selections will be stored");
     st.text("""As an expert, you should consider the input (SPARQL queries) and output data (RDF triples) and calculate how many errors occur in the delivered explanation.
             An error-free statement therefore contains 0 errors. An error is any statement that is incorrectly derived from the data, e.g. 
-1) Input data: Any variable is selected, although only ?s is asked for
-2) Output data: Mention of annotationId with incorrect timestamp
+1) Input data: Any variable is selected, although only `?s` is asked for
+2) Output data: Mention of `annotationId` with incorrect timestamp
 
-Please indicate the cumulative errors for explanation and go to the next or previous experiment. In both cases the value will be saved.""")
+Please indicate the cumulative errors for explanation and go to the next or previous experiment. In both cases, the value will be saved.""")
 
 st.divider();
 
