@@ -99,7 +99,6 @@ def setup_c_experiments(experiments):
 
 def fetch_user_information(response):
     id = response.json()["id"];
-    st.toast(f"User {id} created");
     st.session_state.user_id = id;
     setup_c_experiments(response.json()["correctnessExperiments"]);
     setup_u_experiments(response.json()["understandabilityExperiments"]);
@@ -145,7 +144,7 @@ def show_explanations_for_correctness():
         col1, col2 = st.columns([.5,.5])
         with col2:
             st.button("Next", on_click=lambda: increment_correctness(len(st.session_state.correctness_tuples), errorsInput), key="next")
-    
+
     st.divider();
 
     input_data, output_data = st.columns(2)
@@ -163,6 +162,8 @@ def increment_correctness(max, rating):
         store_rating(rating);
         if st.session_state.current_correctness_index < max:
             st.session_state.current_correctness_index += 1;
+        else:
+            st.session_state.current_correctness_index = 0;
     except Exception as e:
         st.toast(str(e));
 
@@ -172,20 +173,23 @@ def store_rating(rating_str):
     try:
         rating = int(rating_str);
         if not 0 <= rating <= 100:
-            raise Exception("Errors must be between 0 and 100");
+            st.toast("Skipped experiment as the value must be a positive integer");
+            return None;
         response = requests.post(f"{BACKEND_URL}/storecorrectness/{current_id}/{current_hash}/{rating}");
         if 200 <= response.status_code < 300:
             st.session_state.correctness_tuples[st.session_state.current_correctness_index]["rating"] = rating;
             print("Stored errors for explanations with hash ", st.session_state.correctness_tuples[st.session_state.current_correctness_index]["hash"], ": ", rating);
             compute_done_experiments();
     except ValueError:
-        raise Exception("Please enter a number between 0 and 100");
+        raise Exception("Please enter a positive integer");
 
 def decrement_correctness(min, rating):
     try:
         store_rating(rating);
         if st.session_state.current_correctness_index > min:
             st.session_state.current_correctness_index -= 1;
+        else:
+            st.session_state.current_correctness_index = len(st.session_state.correctness_tuples) - 1;
     except Exception as e:
         st.toast(str(e));
 
