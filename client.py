@@ -92,11 +92,6 @@ def setup_c_experiments(experiments):
         });
     st.session_state.correctness_tuples = experimentsList; 
 
-#def create_user():
-#    response = requests.post(f"{BACKEND_URL}/createuser");
-#    if 200 <= response.status_code < 300:
-#        fetch_user_information(response);
-
 def fetch_user_information(response):
     id = response.json()["id"];
     st.session_state.user_id = id;
@@ -106,13 +101,6 @@ def fetch_user_information(response):
 def show_correctness_metric():
     if st.session_state.correctness_tuples is not None:
         show_explanations_for_correctness(); # Pass parameter, concrete tuple
-        #placeholder, button1, currentIndex, button2, placeholder2 = st.columns([.35,.1,.1,.1,.35])
-        #with button1:
-        #    st.button("Previous", on_click=lambda: previous_correctness_explanation())
-        #with currentIndex:
-        #    st.text(f"{st.session_state.current_correctness_index+1}")
-        #with button2:
-        #    st.button("Next", on_click=lambda: next_correctness_explanation())
 
 def compute_done_experiments():
     # Compute for correctness
@@ -180,8 +168,8 @@ def store_rating(rating_str):
             st.session_state.correctness_tuples[st.session_state.current_correctness_index]["rating"] = rating;
             print("Stored errors for explanations with hash ", st.session_state.correctness_tuples[st.session_state.current_correctness_index]["hash"], ": ", rating);
             compute_done_experiments();
-    except ValueError:
-        raise Exception("Please enter a positive integer");
+    except ValueError as e:
+        raise Exception("The passed value isn't a integer, error: " + e);
 
 def decrement_correctness(min, rating):
     try:
@@ -206,18 +194,6 @@ def show_understandability_metric():
                 st.text(f"{st.session_state.current_understandability_index+1}")
         with button2:
             st.button("Next", on_click=lambda: next_understandability_explanation())
-
-def next_correctness_explanation():
-    if(st.session_state.current_correctness_index < st.session_state.number_of_correctness - 1):
-        st.session_state.current_correctness_index += 1;
-    else:
-        st.session_state.current_correctness_index = 0;
-
-def previous_correctness_explanation():
-    if(st.session_state.current_correctness_index > 0):
-        st.session_state.current_correctness_index -= 1;
-    else:
-        st.session_state.current_correctness_index = st.session_state.number_of_correctness - 1;
 
 def next_understandability_explanation():
     # Store current best and worst
