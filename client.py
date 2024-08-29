@@ -4,7 +4,7 @@ import requests
 import pandas as pd
 from decouple import config
 
-BACKEND_URL = config("BACKEND_URL")
+BACKEND_URL = "http://localhost:4000"#config("BACKEND_URL")
 
 st.set_page_config(layout="wide")
 
@@ -37,6 +37,8 @@ if "best_worst_current" not in st.session_state:
         "best": None,
         "worst": None
     }
+if "experiment_selection" not in st.session_state:
+    st.session_state.experiment_selection = 1.0;
 
 if "hash_explanation_dict" not in st.session_state:
     st.session_state.hash_explanation_dict = pd.read_csv("hash_explanation_dict.csv", index_col=0, header=None).to_dict(orient="index");
