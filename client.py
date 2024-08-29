@@ -44,7 +44,10 @@ if "hash_explanation_dict_inputdata" not in st.session_state:
     st.session_state.hash_explanation_dict_inputdata = pd.read_csv("hash_explanation_dict_inputdata.csv", index_col=0, header=None).to_dict(orient="index");   
 if "hash_explanation_dict_outputdata" not in st.session_state:
     st.session_state.hash_explanation_dict_outputdata = pd.read_csv("hash_explanation_dict_outputdata.csv", index_col=0, header=None).to_dict(orient="index"); 
-                    
+if "all_correctness_experiments" not in st.session_state:
+    st.session_state.all_correctness_experiments = None;
+if "metadata_dict" not in st.session_state:
+    st.session_state.metadata_dict = pd.read_csv("hash_explanation_metadata_dict.csv", header=None, names=['Hash','metadata'], index_col=0).to_dict(orient="index");
 
 st.title(f"{evaluation_title} evaluation");
 st.header(f"Current evaluated metric: {st.session_state.current_metric}");
@@ -64,6 +67,7 @@ elif st.session_state.current_metric == "Correctness":
 Please indicate the cumulative errors for explanation and go to the next or previous experiment. In both cases, the value will be saved.""")
 
 st.divider();
+selection = st.empty();
 
 ############## METHODS ##############
 
@@ -86,11 +90,21 @@ def setup_u_experiments(dict):
 def setup_c_experiments(experiments):
     experimentsList = [];
     for (key,val) in experiments.items():
-        experimentsList.append({
+        experimentsList.append({                    
             "hash": key,
             "rating": val
         });
-    st.session_state.correctness_tuples = experimentsList; 
+    st.session_state.correctness_tuples = experimentsList;
+    st.session_state.all_correctness_experiments = experimentsList;
+
+def filter_experiments(): # either 0.5 or 1.0 or 1.25 or 1.5
+    current_selection = st.session_state['experiment_selection']
+    selection_hash_list = [];
+    for (key,val) in st.session_state.metadata_dict.items():
+        metadata = val['metadata'];
+        if str(current_selection) in metadata:
+            selection_hash_list.append(key);
+    st.session_state.correctness_tuples = [x for x in st.session_state.all_correctness_experiments if x["hash"] in selection_hash_list]
 
 def fetch_user_information(response):
     id = response.json()["id"];
@@ -310,6 +324,7 @@ with st.sidebar:
         st.subheader("Done evaluated experiments")
         st.text(f"Correctness: {st.session_state.correctness_done}/{len(st.session_state.correctness_tuples)}");
         st.text(f"Understandability: {st.session_state.understandability_done}/{len(st.session_state.understandability_tuples)}");
+        selection = st.selectbox("Filter experiments", options=[0.5, 1.0, 1.25, 1.5], index=1, on_change=filter_experiments, key='experiment_selection')
     else:
         user_input = st.text_input("User ID", help="Enter your user ID")
         st.button("Login", on_click=lambda: login_user(user_input))
