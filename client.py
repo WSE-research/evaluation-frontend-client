@@ -4,7 +4,7 @@ import requests
 import pandas as pd
 from decouple import config
 
-BACKEND_URL = "http://localhost:4000"#config("BACKEND_URL")
+BACKEND_URL = config("BACKEND_URL")
 
 st.set_page_config(layout="wide")
 
