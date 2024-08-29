@@ -111,6 +111,7 @@ def fetch_user_information(response):
     st.session_state.user_id = id;
     setup_c_experiments(response.json()["correctnessExperiments"]);
     setup_u_experiments(response.json()["understandabilityExperiments"]);
+    filter_experiments();
 
 def show_correctness_metric():
     if st.session_state.correctness_tuples is not None:
