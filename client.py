@@ -227,7 +227,7 @@ def next_understandability_explanation():
         "best": st.session_state.best_worst_current["best"],
         "worst": st.session_state.best_worst_current["worst"]
     }
-    response = requests.post(f"{BACKEND_URL}/storeunderstandability/{str(st.session_state.experiment_selection).replace(".","_")}/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});    
+    response = requests.post(f"{BACKEND_URL}/storeunderstandability/{str(st.session_state.experiment_selection).replace('.', '_')}/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});    
     if 200 <= response.status_code < 300:
         print("Stored best and worst explanations successfully");
         st.session_state.understandability_tuples[st.session_state.current_understandability_index]["best"] = data["best"];
@@ -252,7 +252,7 @@ def previous_understandability_explanation():
         "worst": st.session_state.best_worst_current["worst"]
     };
     if(st.session_state.current_understandability_index > 0):
-        response = requests.post(f"{BACKEND_URL}/storeunderstandability/{str(st.session_state.experiment_selection).replace(".","_")}/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});
+        response = requests.post(f"{BACKEND_URL}/storeunderstandability/{str(st.session_state.experiment_selection).replace('.', '_')}/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});
         if 200 <= response.status_code < 300:
             print("Stored best and worst explanations successfully");
             st.session_state.understandability_tuples[st.session_state.current_understandability_index]["best"] = data["best"];
