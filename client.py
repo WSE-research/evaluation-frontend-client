@@ -28,7 +28,7 @@ if "current_correctness_index" not in st.session_state:
 if "correctness_tuples" not in st.session_state:
     st.session_state.correctness_tuples = None;     
 if "understandability_tuples" not in st.session_state:
-    st.session_state.understandability_tuples = None;
+    st.session_state.understandability_tuples = [];
 if "current_metric" not in st.session_state:
     st.session_state.current_metric = "Correctness";
 if "best_worst_current" not in st.session_state:
@@ -48,6 +48,8 @@ if "hash_explanation_dict_outputdata" not in st.session_state:
     st.session_state.hash_explanation_dict_outputdata = pd.read_csv("hash_explanation_dict_outputdata.csv", index_col=0, header=None).to_dict(orient="index"); 
 if "all_correctness_experiments" not in st.session_state:
     st.session_state.all_correctness_experiments = None;
+if "all_understandability_experiments" not in st.session_state:
+    st.session_state.all_understandability_experiments = None;
 if "metadata_dict" not in st.session_state:
     st.session_state.metadata_dict = pd.read_csv("hash_explanation_metadata_dict.csv", header=None, names=['Hash','metadata'], index_col=0).to_dict(orient="index");
 
@@ -76,12 +78,17 @@ selection = st.empty();
 def switch_metric():
     if(st.session_state.current_metric == "Correctness"):
         st.session_state.current_metric = "Understandability";
+        st.session_state.best_worst_current = { # Initially set up the best and worst for the first tuple
+            "tuple": st.session_state.understandability_tuples[st.session_state.current_understandability_index]["tuple"],
+            "best": st.session_state.understandability_tuples[st.session_state.current_understandability_index]["best"],
+            "worst": st.session_state.understandability_tuples[st.session_state.current_understandability_index]["worst"]   
+        };
     elif(st.session_state.current_metric == "Understandability"):
         st.session_state.current_metric = "Correctness";
 
-def setup_u_experiments(dict):
+def setup_u_experiments(filter):
     experiments_tuples = [];
-    for (key,val) in dict.items():
+    for (key,val) in st.session_state.all_understandability_experiments[str(filter)].items(): # Default filter
         experiments_tuples.append({
             "tuple": key,
             "best": val["best"],
@@ -107,12 +114,14 @@ def filter_experiments(): # either 0.5 or 1.0 or 1.25 or 1.5
         if str(current_selection) in metadata:
             selection_hash_list.append(key);
     st.session_state.correctness_tuples = [x for x in st.session_state.all_correctness_experiments if x["hash"] in selection_hash_list]
+    setup_u_experiments(str(current_selection).replace(".","_"));
 
 def fetch_user_information(response):
     id = response.json()["id"];
     st.session_state.user_id = id;
+    st.session_state.all_understandability_experiments = response.json()["understandabilityExperiments"];
     setup_c_experiments(response.json()["correctnessExperiments"]);
-    setup_u_experiments(response.json()["understandabilityExperiments"]);
+    setup_u_experiments("1_0");
     filter_experiments();
 
 def show_correctness_metric():
@@ -218,7 +227,7 @@ def next_understandability_explanation():
         "best": st.session_state.best_worst_current["best"],
         "worst": st.session_state.best_worst_current["worst"]
     }
-    response = requests.post(f"{BACKEND_URL}/storeunderstandability/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});    
+    response = requests.post(f"{BACKEND_URL}/storeunderstandability/{str(st.session_state.experiment_selection).replace(".","_")}/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});    
     if 200 <= response.status_code < 300:
         print("Stored best and worst explanations successfully");
         st.session_state.understandability_tuples[st.session_state.current_understandability_index]["best"] = data["best"];
@@ -243,7 +252,7 @@ def previous_understandability_explanation():
         "worst": st.session_state.best_worst_current["worst"]
     };
     if(st.session_state.current_understandability_index > 0):
-        response = requests.post(f"{BACKEND_URL}/storeunderstandability/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});
+        response = requests.post(f"{BACKEND_URL}/storeunderstandability/{str(st.session_state.experiment_selection).replace(".","_")}/{st.session_state.user_id}/{st.session_state.best_worst_current['tuple']}",json=data, headers={"Content-Type": "application/json"});
         if 200 <= response.status_code < 300:
             print("Stored best and worst explanations successfully");
             st.session_state.understandability_tuples[st.session_state.current_understandability_index]["best"] = data["best"];
@@ -287,7 +296,7 @@ def show_error_rating_scale():
 
 def show_explanations(tuple, type):
 
-    # Pre-process the tuple
+    # Pre-process the tuple   
     tupleFixed = tuple.split("-");
 
     st.session_state.best_worst_current["tuple"] = tuple;
@@ -332,16 +341,12 @@ with st.sidebar:
         user_input = st.text_input("User ID", help="Enter your user ID")
         st.button("Login", on_click=lambda: login_user(user_input))
 
-    #st.text(f"Correctness: {st.session_state.correctness_done}/{st.session_state.number_of_correctness}")
-    #st.text(f"Understandability: {st.session_state.understandability_done}/{st.session_state.number_of_understandability}")
-    #st.button("Create new user", on_click=lambda: create_user(), help="Creates a new user ID with \n a new experimental setting")
     st.button("Switch metric", on_click=lambda: switch_metric(), help="Switches between correctness and understandability")
 
 if st.session_state.current_metric == "Correctness":
     show_correctness_metric();
 elif st.session_state.current_metric == "Understandability":                
     show_understandability_metric();
-
 
 
 ####### Explanations reagrding the correctness dict #######
